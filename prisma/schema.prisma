@@ -10,42 +10,66 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model TeamManager {
-  id String  @id @default(cuid())
-  teamId String?
-  team Team? @relation(fields: [teamId], references: [id])
-  name String
-  country String
+  id        String   @id @default(cuid())
+  teamId    String?
+  team      Team?    @relation(fields: [teamId], references: [id])
+  name      String
+  country   String
   formation String
-  skill Int
+  skill     Int
   birthYear Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-
 model TeamPlayer {
-  id String  @id @default(cuid())
+  id            String   @id @default(cuid())
   transactionId String?
-  teamId String?
-  team Team? @relation(fields: [teamId], references: [id])
-  name String
-  country String
-  position String
-  skill Int
-  birthYear Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  teamId        String?
+  team          Team?    @relation(fields: [teamId], references: [id])
+  name          String
+  country       String
+  position      String
+  skill         Int
+  birthYear     Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Item {
+  id        String      @id @default(cuid())
+  type      String
+  name      String
+  value     Float
+  quantity  Int?        @default(5)
+  price     Float
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  ItemOwned ItemOwned[]
+}
+
+model ItemOwned {
+  id            String   @id @default(cuid())
+  transactionId String
+  itemId        String
+  item          Item     @relation(fields: [itemId], references: [id])
+  userId        String
+  user          Team     @relation(fields: [userId], references: [id])
+  used          Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Team {
-  id String  @id @default(cuid())
-  name String
-  publicKey String @unique
+  id         String        @id @default(cuid())
+  name       String
+  publicKey  String        @unique
   privateKey String
-  manager TeamManager[]
-  players TeamPlayer[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  manager    TeamManager[]
+  players    TeamPlayer[]
+  chemistry  Int           @default(10)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  ItemOwned  ItemOwned[]
 }
