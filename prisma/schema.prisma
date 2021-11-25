@@ -72,4 +72,83 @@ model Team {
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
   ItemOwned  ItemOwned[]
+  Game       Game[]
+  GameReward GameReward[]
+}
+
+model BotTeam {
+  id         String       @id @default(cuid())
+  name       String       @default("Bot FC")
+  chemistry  Int          @default(15)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  BotManager BotManager[]
+  BotPlayer  BotPlayer[]
+  Game       Game[]
+}
+
+model BotManager {
+  id        String   @id @default(cuid())
+  botId     String?
+  bot       BotTeam? @relation(fields: [botId], references: [id])
+  name      String
+  country   String
+  formation String
+  skill     Int      @default(6)
+  birthYear Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BotPlayer {
+  id        String   @id @default(cuid())
+  botId     String?
+  bot       BotTeam? @relation(fields: [botId], references: [id])
+  name      String
+  country   String
+  position  String
+  skill     Int
+  birthYear Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Game {
+  id         String       @id @default(cuid())
+  teamId     String
+  team       Team         @relation(fields: [teamId], references: [id])
+  botTeamId  String
+  botTeam    BotTeam      @relation(fields: [botTeamId], references: [id])
+  GameStats  GameStats?
+  winner     String?
+  score      String?
+  finished   Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  GameReward GameReward[]
+}
+
+model GameStats {
+  id        String   @id @default(cuid())
+  gameId    String   @unique
+  game      Game     @relation(fields: [gameId], references: [id])
+  botScore  Int      @default(0)
+  teamScore Int      @default(0)
+  hit       Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GameReward {
+  id        String   @id @default(cuid())
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id])
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id])
+  type      String
+  name      String
+  value     Float
+  cliamed   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

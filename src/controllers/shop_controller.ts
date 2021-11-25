@@ -44,7 +44,13 @@ export const addProduct = async (req: Request, res: Response) => {
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
-    const products = await prisma.item.findMany();
+    const products = await prisma.item.findMany({
+      where: {
+        quantity: {
+          not: 0,
+        },
+      },
+    });
     return res.status(200).send(products);
   } catch (e) {
     return res.status(500).json({
@@ -82,15 +88,15 @@ export const buyProduct = async (req: Request, res: Response) => {
     }
 
     const user = await prisma.team.findFirst({
-        where: {
-            publicKey
-        }
-    })
+      where: {
+        publicKey,
+      },
+    });
 
-    if(!user) {
-        return res.status(400).json({
-            message: "User not found"
-        })
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found",
+      });
     }
 
     server
@@ -130,11 +136,11 @@ export const buyProduct = async (req: Request, res: Response) => {
         });
         // add product to user account
         await prisma.itemOwned.create({
-            data: {
-                itemId: product.id,
-                userId: user.id,
-                transactionId: transactionResult.hash,
-            }
+          data: {
+            itemId: product.id,
+            userId: user.id,
+            transactionId: transactionResult.hash,
+          },
         });
       })
       .catch((err) => {
@@ -155,14 +161,14 @@ export const userProducts = async (req: Request, res: Response) => {
   try {
     const publicKey = getPublicKey(req);
     const user = await prisma.team.findFirst({
-        where: {
-          publicKey
-        }
-    })
-    if(!user) {
-        return res.status(400).json({
-            message: "User not found"
-        })
+      where: {
+        publicKey,
+      },
+    });
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found",
+      });
     }
     const products = await prisma.itemOwned.findMany({
       where: {
@@ -170,7 +176,7 @@ export const userProducts = async (req: Request, res: Response) => {
       },
       include: {
         item: true,
-      }
+      },
     });
 
     return res.status(200).send(products);
@@ -179,4 +185,4 @@ export const userProducts = async (req: Request, res: Response) => {
       message: "Something went wrong",
     });
   }
-}
+};
