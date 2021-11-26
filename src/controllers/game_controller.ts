@@ -192,7 +192,7 @@ export const hit = async (req: Request, res: Response) => {
           },
         });
         if (gameStats.teamScore >= gameStats.botScore) {
-          const rewards = [10, 15, 5];
+          const rewards = [200, 200, 150];
           const random = Math.floor(Math.random() * rewards.length);
           const reward = rewards[random];
           await prisma.gameReward.create({
@@ -334,6 +334,45 @@ export const getRoom = async (req: Request, res: Response) => {
       winner: game.winner,
       teamPlayer: sortPlayersByPosition(game.team.players),
       botPlayer: sortPlayersByPosition(game.botTeam.BotPlayer),
+    });
+  } catch (e) {
+    return res.status(500).json({
+      message: "An error occured while getting the game",
+    });
+  }
+};
+
+export const getRoomReward = async (req: Request, res: Response) => {
+  try {
+    const { room } = req.params;
+
+    const game = await prisma.game.findFirst({
+      where: {
+        id: room,
+      },
+      include: {
+        team: {
+          include: {
+            players: true,
+          },
+        },
+      },
+    });
+
+    if (!game) {
+      return res.status(404).json({
+        message: "Game not found",
+      });
+    }
+
+    const reward = await prisma.gameReward.findFirst({
+      where: {
+        gameId: game.id,
+      },
+    });
+
+    return res.status(200).json({
+      reward,
     });
   } catch (e) {
     return res.status(500).json({

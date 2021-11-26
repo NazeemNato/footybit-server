@@ -142,6 +142,7 @@ model GameStats {
 model GameReward {
   id        String   @id @default(cuid())
   gameId    String
+  transactionId String?
   game      Game     @relation(fields: [gameId], references: [id])
   teamId    String
   team      Team     @relation(fields: [teamId], references: [id])

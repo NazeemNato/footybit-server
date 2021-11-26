@@ -71,106 +71,106 @@ export const generateScore = async ({ botPlayer, teamPlayer }: Props) => {
     if (teamAttackerSkill > botDenfenderSkill) {
       return {
         team: randomNumber(1, 3),
-        bot: randomNumber(0, 3),
+        bot: randomNumber(0, 1),
       };
     } else {
       return {
-        team: randomNumber(0, 3),
+        team: randomNumber(1, 3),
         bot: randomNumber(1, 3),
       };
     }
   } else if (team === "attacking" && bot === "attacking") {
     if (teamAttackerSkill > botDenfenderSkill) {
       return {
-        team: 1,
-        bot: randomNumber(0, 3),
+        team: randomNumber(1, 3),
+        bot: 0,
       };
     } else if (teamAttackerSkill < botDenfenderSkill) {
       return {
-        team: randomNumber(0, 3),
-        bot: 1,
+        team: 0,
+        bot: randomNumber(0, 1),
       };
     } else if (teamAttackerSkill === botDenfenderSkill) {
       return {
-        team: randomNumber(0, randomNumber(0, 3)),
-        bot: randomNumber(0, randomNumber(0, 3)),
+        team: randomNumber(0, 1),
+        bot: randomNumber(0, 1),
       };
     } else {
       return {
-        team: randomNumber(0, 3),
-        bot: randomNumber(0, 3),
+        team: randomNumber(0,1),
+        bot: randomNumber(0, 1),
       };
     }
   } else if (team === "defending" && bot === "defending") {
     if (teamDenfenderSkill > botAttackerSkill) {
       return {
-        team: randomNumber(0, 3),
-        bot: randomNumber(0, 3),
+        team: randomNumber(1, 4),
+        bot: 0,
       };
     } else if (teamDenfenderSkill < botAttackerSkill) {
       return {
-        team: randomNumber(0, 3),
-        bot: 1,
+        team: 0,
+        bot: randomNumber(1, 4),
       };
     } else if (teamDenfenderSkill === botAttackerSkill) {
       return {
-        team: randomNumber(0, randomNumber(0, 3)),
-        bot: randomNumber(0, randomNumber(0, 3)),
+        team: 0,
+        bot: 0,
       };
     } else {
       return {
-        team: randomNumber(0, 3),
-        bot: randomNumber(0, 3),
+        team: 0,
+        bot: 0,
       };
     }
   } else if (team === "attacking" && bot === "defending") {
     if (teamAttackerSkill > botDenfenderSkill) {
       return {
         team: randomNumber(1, 3),
-        bot: randomNumber(0, 3),
+        bot: 0,
       };
     } else if (teamAttackerSkill < botDenfenderSkill) {
       return {
-        team: randomNumber(0, 3),
-        bot: randomNumber(0, randomNumber(0, 3)),
+        team: 0,
+        bot: 1,
       };
     } else if (teamAttackerSkill === botDenfenderSkill) {
       return {
-        team: randomNumber(0, randomNumber(0, 3)),
-        bot: randomNumber(0, randomNumber(0, 3)),
+        team: 0,
+        bot: 0,
       };
     } else {
       return {
-        team: randomNumber(0, 3),
-        bot: randomNumber(0, 3),
+        team:0,
+        bot: 0
       };
     }
   } else if (team === "defending" && bot === "attacking") {
     if (teamDenfenderSkill > botAttackerSkill) {
       return {
-        team: randomNumber(0, 3),
-        bot: randomNumber(0, 3),
+        team: randomNumber(0, 2),
+        bot: 0
       };
     } else if (teamDenfenderSkill < botAttackerSkill) {
       return {
-        bot: randomNumber(1, 3),
-        team: randomNumber(0, 3),
+        bot: 0,
+        team: randomNumber(1, 3),
       };
     } else if (teamDenfenderSkill === botAttackerSkill) {
       return {
-        team: randomNumber(0, randomNumber(0, 3)),
-        bot: randomNumber(0, randomNumber(0, 3)),
+        team: randomNumber(0, randomNumber(1, 3)),
+        bot: randomNumber(0, randomNumber(1, 3)),
       };
     } else {
       return {
-        team: randomNumber(0, 3),
-        bot: randomNumber(0, 3),
+        team: randomNumber(1, 3),
+        bot: randomNumber(1, 3),
       };
     }
   } else {
     return {
-      team: randomNumber(0, 3),
-      bot: randomNumber(0, 3),
+      team: randomNumber(1, 3),
+      bot: randomNumber(1, 3),
     };
   }
 };
@@ -190,5 +190,6 @@ export const sortPlayersByPosition = (players: any[]) => {
   const sortedPlayers = position.map((position) => {
     return players.filter((player) => player.position === position);
   });
-  return sortedPlayers;
+  const playersSorted = sortedPlayers.reduce((acc, val) => acc.concat(val), []);
+  return playersSorted;
 };
