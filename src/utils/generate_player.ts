@@ -66,8 +66,9 @@ export const generateBotPlayers = (botId: string) => {
   const players = [];
 
   for (let i = 0; i < positions.length; i++) {
-    players.push({ ...generatePlayer(positions[i], i, 7), botId });
+    players.push({ ...generatePlayer(positions[i], i, 5), botId });
   }
+
 
   return players;
 };

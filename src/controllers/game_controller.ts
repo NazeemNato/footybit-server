@@ -4,7 +4,7 @@ import { generateBotPlayers } from "../utils/generate_player";
 import { generateManager } from "../utils/generate_manager";
 import { getPublicKey } from "../utils/get_publicKey";
 import { redis } from "../config/redis";
-import { generateScore } from "../utils/generate_score";
+import { generateScore, sortPlayersByPosition } from "../utils/generate_score";
 const prisma = new PrismaClient();
 
 export const createGameRoom = async (req: Request, res: Response) => {
@@ -280,7 +280,7 @@ export const hit = async (req: Request, res: Response) => {
           update: {
             hit: gameStats.hit + 1,
             botScore: gameStats.botScore + goals.bot,
-            teamScore: gameStats.teamScore + goals.player,
+            teamScore: gameStats.teamScore + goals.team,
           },
         },
       },
@@ -294,6 +294,50 @@ export const hit = async (req: Request, res: Response) => {
   } catch (e) {
     return res.status(500).json({
       message: "An error occured while hitting",
+    });
+  }
+};
+
+export const getRoom = async (req: Request, res: Response) => {
+  try {
+    const { room } = req.params;
+
+    const game = await prisma.game.findFirst({
+      where: {
+        id: room,
+      },
+      include: {
+        botTeam: {
+          include: {
+            BotPlayer: true,
+            BotManager: true,
+          },
+        },
+        team: {
+          include: {
+            players: true,
+            manager: true,
+          },
+        },
+      },
+    });
+
+    if (!game) {
+      return res.status(404).json({
+        message: "Game not found",
+      });
+    }
+
+    return res.status(200).json({
+      score: game.score,
+      finished: game.finished,
+      winner: game.winner,
+      teamPlayer: sortPlayersByPosition(game.team.players),
+      botPlayer: sortPlayersByPosition(game.botTeam.BotPlayer),
+    });
+  } catch (e) {
+    return res.status(500).json({
+      message: "An error occured while getting the game",
     });
   }
 };
