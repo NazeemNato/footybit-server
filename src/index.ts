@@ -20,6 +20,10 @@ app.use(apiUrl, item);
 app.use(apiUrl, game);
 app.use(apiUrl, reward);
 
+app.get("/", (req, res) => {
+    res.send("up!");
+})
+
 app.listen(PORT, () => {
     console.log(`Server is running on port: ${PORT}`);
 })
