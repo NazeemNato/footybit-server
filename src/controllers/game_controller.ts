@@ -124,6 +124,7 @@ export const hit = async (req: Request, res: Response) => {
     const { room } = req.params;
     const publicKey = getPublicKey(req);
     const isGameStarted = await redis.get(room);
+    const { style, min } = req.body;
 
     const user = await prisma.team.findFirst({
       where: {
@@ -191,19 +192,42 @@ export const hit = async (req: Request, res: Response) => {
             chemistry: user.chemistry + 1,
           },
         });
-        if (gameStats.teamScore >= gameStats.botScore) {
-          const rewards = [200, 200, 150];
-          const random = Math.floor(Math.random() * rewards.length);
-          const reward = rewards[random];
-          await prisma.gameReward.create({
-            data: {
+        if (gameStats.teamScore > gameStats.botScore) {
+          const reward = 200;
+          const rewardExist = await prisma.gameReward.findFirst({
+            where: {
               gameId: game.id,
-              teamId: user.id,
-              name: `${reward} XDB!`,
-              type: "XDB",
-              value: reward,
             },
           });
+          if (!rewardExist) {
+            await prisma.gameReward.create({
+              data: {
+                gameId: game.id,
+                teamId: user.id,
+                name: `${reward} XDB!`,
+                type: "XDB",
+                value: reward,
+              },
+            });
+          }
+        } else if (gameStats.teamScore === gameStats.botScore) {
+          const reward = 150;
+          const rewardExist = await prisma.gameReward.findFirst({
+            where: {
+              gameId: game.id,
+            },
+          });
+          if (!rewardExist) {
+            await prisma.gameReward.create({
+              data: {
+                gameId: game.id,
+                teamId: user.id,
+                name: `${reward} XDB!`,
+                type: "XDB",
+                value: reward,
+              },
+            });
+          }
         }
         await redis.del(room);
         return res.status(200).json({
@@ -269,6 +293,12 @@ export const hit = async (req: Request, res: Response) => {
     const goals = await generateScore({
       botPlayer: bot.BotPlayer,
       teamPlayer: user.players,
+      playerChemistry: user.chemistry,
+      botChecmistry: bot.chemistry,
+      style: style,
+      min: min,
+      bot: gameStats.botScore,
+      team: gameStats.teamScore,
     });
 
     await prisma.game.update({
@@ -279,8 +309,8 @@ export const hit = async (req: Request, res: Response) => {
         GameStats: {
           update: {
             hit: gameStats.hit + 1,
-            botScore: gameStats.botScore + goals.bot,
-            teamScore: gameStats.teamScore + goals.team,
+            botScore: gameStats.botScore + goals.botScore,
+            teamScore: gameStats.teamScore + goals.teamScore,
           },
         },
       },
@@ -377,6 +407,51 @@ export const getRoomReward = async (req: Request, res: Response) => {
   } catch (e) {
     return res.status(500).json({
       message: "An error occured while getting the game",
+    });
+  }
+};
+
+export const cancelGame = (req: Request, res: Response) => {
+  try {
+    const { room } = req.params;
+
+    const game = prisma.game.findFirst({
+      where: {
+        id: room,
+        finished: false,
+      },
+    });
+
+    if (!game) {
+      return res.json({
+        message: "Already finished",
+      });
+    }
+
+    prisma.game.update({
+      where: {
+        id: room,
+      },
+      data: {
+        score: "3-0",
+        finished: true,
+        winner: "BOT",
+        GameStats: {
+          update: {
+            botScore: 3,
+            teamScore: 0,
+            hit: 3,
+          },
+        },
+      },
+    });
+
+    return res.status(200).json({
+      message: "Game cancelled",
+    });
+  } catch (e) {
+    return res.status(500).json({
+      message: "An error occured while canceling the game",
     });
   }
 };
